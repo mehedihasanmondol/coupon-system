@@ -8,11 +8,14 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\PrizeTemplateController;
 use App\Http\Controllers\PrizeDrawController;
+use App\Http\Controllers\WinnerController;
 
 // Public Routes
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect('/winners');
 });
+
+Route::get('/winners', [App\Http\Controllers\WinnerController::class, 'index'])->name('winners.index');
 
 Route::get('/coupon/open', [CouponController::class, 'showOpen'])->name('coupon.open');
 Route::post('/coupon/verify', [CouponController::class, 'verify'])->name('coupon.verify');
