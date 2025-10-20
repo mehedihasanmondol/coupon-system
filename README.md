@@ -1,61 +1,182 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel কুপন জেনারেটর সিস্টেম - ইনস্টলেশন গাইড
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## ধাপ ১: Laravel প্রজেক্ট সেটআপ
 
-## About Laravel
+```bash
+# নতুন Laravel প্রজেক্ট তৈরি করুন
+composer create-project laravel/laravel coupon-system
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# প্রজেক্ট ডিরেক্টরিতে যান
+cd coupon-system
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ধাপ ২: ডাটাবেস কনফিগারেশন
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+`.env` ফাইল খুলুন এবং ডাটাবেস সেটিংস আপডেট করুন:
 
-## Learning Laravel
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=coupon_system
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ধাপ ৩: Migration ফাইল তৈরি
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+নিচের কমান্ডগুলো রান করুন:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+php artisan make:migration create_settings_table
+php artisan make:migration create_coupons_table
+php artisan make:migration create_prize_templates_table
+php artisan make:migration create_prize_winners_table
+php artisan make:migration create_users_table
+```
 
-## Laravel Sponsors
+প্রদত্ত Migration কোডগুলো সংশ্লিষ্ট ফাইলে কপি করুন।
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ধাপ ৪: Model তৈরি
 
-### Premium Partners
+```bash
+php artisan make:model Setting
+php artisan make:model Coupon
+php artisan make:model PrizeTemplate
+php artisan make:model PrizeWinner
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+প্রদত্ত Model কোডগুলো `app/Models` ডিরেক্টরিতে কপি করুন।
 
-## Contributing
+## ধাপ ৫: Controller তৈরি
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan make:controller AuthController
+php artisan make:controller AdminController
+php artisan make:controller SettingController
+php artisan make:controller CouponController
+php artisan make:controller PrizeTemplateController
+php artisan make:controller PrizeDrawController
+```
 
-## Code of Conduct
+প্রদত্ত Controller কোডগুলো `app/Http/Controllers` ডিরেক্টরিতে কপি করুন।
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## ধাপ ৬: Routes সেটআপ
 
-## Security Vulnerabilities
+`routes/web.php` ফাইলে প্রদত্ত routes কোড যোগ করুন।
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## ধাপ ৭: View ফাইল তৈরি
 
-## License
+নিচের ডিরেক্টরি স্ট্রাকচার তৈরি করুন:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+resources/views/
+├── layouts/
+│   └── app.blade.php
+├── auth/
+│   └── login.blade.php
+├── admin/
+│   ├── dashboard.blade.php
+│   ├── settings.blade.php
+│   ├── admins.blade.php
+│   ├── coupons/
+│   │   └── index.blade.php
+│   └── prizes/
+│       ├── templates.blade.php
+│       ├── create.blade.php
+│       ├── edit.blade.php
+│       └── draw.blade.php
+└── coupon/
+    └── open.blade.php
+```
+
+প্রদত্ত view কোডগুলো সংশ্লিষ্ট ফাইলে কপি করুন।
+
+## ধাপ ৮: Seeder সেটআপ
+
+`database/seeders/DatabaseSeeder.php` ফাইল আপডেট করুন প্রদত্ত কোড দিয়ে।
+
+## ধাপ ৯: Storage Link তৈরি
+
+```bash
+php artisan storage:link
+```
+
+## ধাপ ১০: Migration Run করুন
+
+```bash
+php artisan migrate --seed
+```
+
+## ধাপ ১১: অ্যাপ্লিকেশন চালু করুন
+
+```bash
+php artisan serve
+```
+
+## ডিফল্ট লগইন তথ্য
+
+- **ইমেইল:** admin@example.com
+- **পাসওয়ার্ড:** password
+
+## প্রধান ফিচারসমূহ
+
+### ১. কুপন ম্যানেজমেন্ট
+- কুপন জেনারেট করুন (ডায়লগ বক্স থেকে সংখ্যা দিয়ে)
+- স্বয়ংক্রিয় নম্বরিং (পূর্ববর্তী নম্বরের পর থেকে)
+- প্রতিটি কুপনের ইউনিক সিক্রেট কোড
+- কুপন স্ট্যাটাস ট্র্যাকিং (বন্ধ/খোলা/ড্র হয়েছে)
+
+### ২. কুপন খোলার সিস্টেম
+- URL: `/coupon/open?coupon=১`
+- সিক্রেট কোড ভেরিফিকেশন
+- সঠিক হলে ফেসবুক পেজে redirect
+- ভুল হলে এরর মেসেজ
+- একবার খোলা কুপন পুনরায় ব্যবহার করা যাবে না
+
+### ৩. পুরস্কার টেমপ্লেট
+- একাধিক পুরস্কার টেমপ্লেট তৈরি
+- প্রতিটি টেমপ্লেটে একাধিক পুরস্কার
+- পুরস্কারের পজিশন ও নাম সেট করা
+
+### ৪. পুরস্কার ঘোষণা
+- শেষ অঘোষিত টেমপ্লেট স্বয়ংক্রিয়ভাবে নির্বাচন
+- খোলা ও অড্রন কুপন থেকে র‍্যান্ডম নির্বাচন
+- বিজয়ীর তথ্য সংরক্ষণ (নাম, ছবি, ঠিকানা, বয়স, মোবাইল)
+- একবার ঘোষিত টেমপ্লেট পুনরায় ব্যবহার হবে না
+
+### ৫. সেটিংস
+- শুরুর নম্বর সেট করা
+- সিক্রেট কোড ডিজিট (৪-১০)
+- ফেসবুক পেজ URL
+
+### ৬. অ্যাডমিন ম্যানেজমেন্ট
+- ডিফল্ট অ্যাডমিন
+- নতুন অ্যাডমিন তৈরি করার সুবিধা
+
+## কুপন ব্যবহারের উদাহরণ
+
+1. অ্যাডমিন ড্যাশবোর্ডে লগইন করুন
+2. "কুপন জেনারেট করুন" বাটনে ক্লিক করুন
+3. যতটি কুপন চান তা লিখুন (যেমন: ১০০)
+4. জেনারেট হলে প্রতিটি কুপনের একটি নম্বর ও সিক্রেট কোড থাকবে
+5. কুপন খুলতে: `/coupon/open?coupon=১`
+6. সিক্রেট কোড দিন
+7. সঠিক হলে ফেসবুক পেজে নিয়ে যাবে
+
+## পুরস্কার ঘোষণার উদাহরণ
+
+1. "পুরস্কার টেমপ্লেট" থেকে নতুন টেমপ্লেট তৈরি করুন
+2. পুরস্কার যোগ করুন (যেমন: ১ম - ব্যাগ, ২য় - ঘড়ি, ৩য় - অ্যালবাম)
+3. "পুরস্কার ঘোষণা" পেজে যান
+4. "পুরস্কার ঘোষণা শুরু করুন" বাটনে ক্লিক করুন
+5. স্বয়ংক্রিয়ভাবে বিজয়ী নির্বাচিত হবে
+6. বিজয়ীদের তথ্য যোগ করুন
+
+## গুরুত্বপূর্ণ নোট
+
+- সিক্রেট কোড বড় হাতের অক্ষরে থাকবে
+- একবার খোলা কুপন পুনরায় খোলা যাবে না
+- একবার ড্র হওয়া কুপন পরবর্তী ড্রতে আসবে না
+- ঘোষিত টেমপ্লেট সম্পাদনা বা মুছে ফেলা যাবে না
+- বিজয়ীর ছবি `storage/app/public/winners` ফোল্ডারে সংরক্ষিত হবে
