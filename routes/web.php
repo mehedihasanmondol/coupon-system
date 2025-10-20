@@ -56,6 +56,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::put('/templates/{template}', [CouponTemplateController::class, 'update'])->name('admin.templates.update');
     Route::delete('/templates/{template}', [CouponTemplateController::class, 'destroy'])->name('admin.templates.destroy');
     Route::patch('/templates/{template}/toggle-active', [CouponTemplateController::class, 'toggleActive'])->name('admin.templates.toggle-active');
+    Route::get('/templates-api', [CouponTemplateController::class, 'apiList'])->name('admin.templates.api');
     
     // Prize Templates
     Route::get('/prizes/templates', [PrizeTemplateController::class, 'index'])->name('admin.prizes.templates');

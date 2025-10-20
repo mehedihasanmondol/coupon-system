@@ -49,7 +49,8 @@
                 <h5>দ্রুত অ্যাক্সেস</h5>
             </div>
             <div class="card-body">
-                <a href="{{ route('admin.coupons') }}" class="btn btn-primary mb-2 w-100">কুপন জেনারেট করুন</a>
+                <a href="{{ route('admin.coupons.index') }}" class="btn btn-primary mb-2 w-100">কুপন ব্যবস্থাপনা</a>
+                <a href="{{ route('admin.templates.index') }}" class="btn btn-info mb-2 w-100">কুপন টেমপ্লেট</a>
                 <a href="{{ route('admin.prizes.create') }}" class="btn btn-success mb-2 w-100">নতুন পুরস্কার টেমপ্লেট</a>
                 <a href="{{ route('admin.prizes.draw') }}" class="btn btn-warning w-100">পুরস্কার ঘোষণা করুন</a>
             </div>

@@ -26,7 +26,6 @@
                     <a href="{{ route('admin.dashboard') }}">ড্যাশবোর্ড</a>
                     <a href="{{ route('admin.coupons.index') }}">কুপন ব্যবস্থাপনা</a>
                     <a href="{{ route('admin.templates.index') }}">কুপন টেমপ্লেট</a>
-                    <a href="{{ route('admin.coupons.image-generator') }}">ইমেজ জেনারেটর</a>
                     <a href="{{ route('admin.prizes.templates') }}">পুরস্কার টেমপ্লেট</a>
                     <a href="{{ route('admin.prizes.draw') }}">পুরস্কার ঘোষণা</a>
                     <a href="{{ route('admin.settings') }}">সেটিংস</a>

@@ -130,10 +130,20 @@ class CouponController extends Controller
             'coupon_ids' => 'required|array|min:1',
             'coupon_ids.*' => 'exists:coupons,id',
             'template_id' => 'required|exists:coupon_templates,id'
+        ], [
+            'coupon_ids.required' => 'অন্তত একটি কুপন নির্বাচন করুন',
+            'coupon_ids.min' => 'অন্তত একটি কুপন নির্বাচন করুন',
+            'template_id.required' => 'একটি টেমপ্লেট নির্বাচন করুন'
         ]);
 
         $coupons = Coupon::whereIn('id', $request->coupon_ids)->get();
         $template = CouponTemplate::findOrFail($request->template_id);
+
+        // Ensure temp directory exists
+        $baseTempDir = storage_path('app/temp');
+        if (!file_exists($baseTempDir)) {
+            mkdir($baseTempDir, 0755, true);
+        }
 
         // Create temporary directory for generated images
         $tempDir = storage_path('app/temp/coupon-images-' . time());
@@ -155,7 +165,13 @@ class CouponController extends Controller
                 $generatedFiles[] = $filePath;
             } catch (\Exception $e) {
                 \Log::error('Error generating image for coupon ' . $coupon->coupon_number . ': ' . $e->getMessage());
+                \Log::error('Stack trace: ' . $e->getTraceAsString());
             }
+        }
+
+        // Check if any files were generated
+        if (empty($generatedFiles)) {
+            return back()->with('error', 'কোন ইমেজ জেনারেট করা যায়নি। লগ চেক করুন।');
         }
 
         // Create ZIP file
@@ -168,6 +184,9 @@ class CouponController extends Controller
                 $zip->addFile($file, basename($file));
             }
             $zip->close();
+        } else {
+            \Log::error('Failed to create ZIP file at: ' . $zipPath);
+            return back()->with('error', 'ZIP ফাইল তৈরি করতে ব্যর্থ হয়েছে।');
         }
 
         // Clean up temporary files
@@ -287,6 +306,10 @@ class CouponController extends Controller
             'coupon_ids' => 'required|array|min:1',
             'coupon_ids.*' => 'exists:coupons,id',
             'template_id' => 'required|exists:coupon_templates,id'
+        ], [
+            'coupon_ids.required' => 'অন্তত একটি কুপন নির্বাচন করুন',
+            'coupon_ids.min' => 'অন্তত একটি কুপন নির্বাচন করুন',
+            'template_id.required' => 'একটি টেমপ্লেট নির্বাচন করুন'
         ]);
 
         $coupons = Coupon::whereIn('id', $request->coupon_ids)->get();

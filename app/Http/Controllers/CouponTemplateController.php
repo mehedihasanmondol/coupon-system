@@ -102,4 +102,20 @@ class CouponTemplateController extends Controller
 
         return back()->with('success', 'টেমপ্লেট স্ট্যাটাস আপডেট হয়েছে');
     }
+
+    public function apiList()
+    {
+        $templates = CouponTemplate::where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($template) {
+                return [
+                    'id' => $template->id,
+                    'name' => $template->name,
+                    'image_url' => asset('storage/' . $template->template_image)
+                ];
+            });
+
+        return response()->json($templates);
+    }
 }

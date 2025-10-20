@@ -70,10 +70,10 @@
                 <button type="button" class="btn btn-success" id="preview-btn">
                     <i class="bi bi-eye"></i> প্রিভিউ দেখুন
                 </button>
-                <button type="submit" class="btn btn-primary" formaction="{{ route('admin.coupons.generate-images') }}">
+                <button type="submit" class="btn btn-primary" formaction="{{ route('admin.coupons.generate-images') }}" formtarget="_blank">
                     <i class="bi bi-download"></i> ডাউনলোড করুন (ZIP)
                 </button>
-                <button type="submit" class="btn btn-info" formaction="{{ route('admin.coupons.print-images') }}">
+                <button type="submit" class="btn btn-info" formaction="{{ route('admin.coupons.print-images') }}" formtarget="_blank">
                     <i class="bi bi-printer"></i> প্রিন্ট করুন
                 </button>
             </div>
@@ -220,6 +220,34 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const modal = new bootstrap.Modal(document.getElementById('previewModal'));
         modal.show();
+    });
+
+    // Form validation for download and print buttons
+    const generateForm = document.getElementById('generate-form');
+    generateForm.addEventListener('submit', function(e) {
+        const selectedCoupons = document.querySelectorAll('.coupon-checkbox:checked');
+        const templateId = selectedTemplateInput.value;
+
+        if (!templateId) {
+            e.preventDefault();
+            alert('একটি টেমপ্লেট নির্বাচন করুন');
+            return false;
+        }
+
+        if (selectedCoupons.length === 0) {
+            e.preventDefault();
+            alert('অন্তত একটি কুপন নির্বাচন করুন');
+            return false;
+        }
+
+        // Show loading message
+        const submitButton = e.submitter;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> প্রসেসিং...';
+        }
+
+        return true;
     });
 });
 </script>
