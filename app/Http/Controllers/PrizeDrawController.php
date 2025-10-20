@@ -60,9 +60,13 @@ class PrizeDrawController extends Controller
                 'prize_name' => $prize['prize_name']
             ]);
 
-            // কুপন ড্র হিসেবে চিহ্নিত করা
-            Coupon::where('id', $couponId)->update(['is_drawn' => true]);
+           
         }
+
+        // সকল খোলা কুপন ড্র হিসেবে চিহ্নিত করা
+        Coupon::where('is_opened', true)
+            ->where('is_drawn', false)
+            ->update(['is_drawn' => true]);
 
         // টেমপ্লেট ঘোষিত হিসেবে চিহ্নিত করা
         $template->update([

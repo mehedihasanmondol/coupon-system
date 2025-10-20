@@ -15,7 +15,7 @@ class AdminController extends Controller
 
     public function admins()
     {
-        $admins = User::where('is_admin', true)->get();
+        $admins = User::get();
         return view('admin.admins', compact('admins'));
     }
 
@@ -31,7 +31,6 @@ class AdminController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_admin' => true
         ]);
 
         return back()->with('success', 'নতুন অ্যাডমিন তৈরি হয়েছে');

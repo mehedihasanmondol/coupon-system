@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'কুপন ব্যবস্থাপনা')
-
+<style>
+    .pagination-links svg {
+    width: 20px;
+}
+</style>
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>কুপন ব্যবস্থাপনা</h2>
@@ -74,7 +78,7 @@
             </tbody>
         </table>
         
-        <div class="mt-3">
+        <div class="mt-3 pagination-links">
             {{ $coupons->links() }}
         </div>
     </div>
