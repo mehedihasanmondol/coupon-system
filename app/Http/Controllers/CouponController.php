@@ -6,6 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Coupon;
 use App\Models\Setting;
+use App\Models\CouponTemplate;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class CouponController extends Controller
 {
@@ -107,5 +114,184 @@ class CouponController extends Controller
         $facebookUrl = Setting::get('facebook_page_url', 'https://www.facebook.com');
         
         return redirect($facebookUrl);
+    }
+
+    public function showImageGenerator()
+    {
+        $coupons = Coupon::orderBy('coupon_number', 'desc')->paginate(50);
+        $templates = CouponTemplate::where('is_active', true)->get();
+        
+        return view('admin.coupons.image-generator', compact('coupons', 'templates'));
+    }
+
+    public function generateImages(Request $request)
+    {
+        $request->validate([
+            'coupon_ids' => 'required|array|min:1',
+            'coupon_ids.*' => 'exists:coupons,id',
+            'template_id' => 'required|exists:coupon_templates,id'
+        ]);
+
+        $coupons = Coupon::whereIn('id', $request->coupon_ids)->get();
+        $template = CouponTemplate::findOrFail($request->template_id);
+
+        // Create temporary directory for generated images
+        $tempDir = storage_path('app/temp/coupon-images-' . time());
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $manager = new ImageManager(new Driver());
+        $generatedFiles = [];
+
+        foreach ($coupons as $coupon) {
+            try {
+                $imagePath = $this->generateCouponImage($coupon, $template, $manager);
+                $fileName = 'coupon-' . $coupon->coupon_number . '.png';
+                $filePath = $tempDir . '/' . $fileName;
+                
+                // Save the generated image
+                file_put_contents($filePath, $imagePath);
+                $generatedFiles[] = $filePath;
+            } catch (\Exception $e) {
+                \Log::error('Error generating image for coupon ' . $coupon->coupon_number . ': ' . $e->getMessage());
+            }
+        }
+
+        // Create ZIP file
+        $zipFileName = 'coupons-' . time() . '.zip';
+        $zipPath = storage_path('app/temp/' . $zipFileName);
+        
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+            foreach ($generatedFiles as $file) {
+                $zip->addFile($file, basename($file));
+            }
+            $zip->close();
+        }
+
+        // Clean up temporary files
+        foreach ($generatedFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+        if (file_exists($tempDir)) {
+            rmdir($tempDir);
+        }
+
+        return response()->download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+    }
+
+    public function previewImage(Request $request)
+    {
+        $request->validate([
+            'coupon_id' => 'required|exists:coupons,id',
+            'template_id' => 'required|exists:coupon_templates,id'
+        ]);
+
+        $coupon = Coupon::findOrFail($request->coupon_id);
+        $template = CouponTemplate::findOrFail($request->template_id);
+
+        $manager = new ImageManager(new Driver());
+        $imageData = $this->generateCouponImage($coupon, $template, $manager);
+
+        return response($imageData)->header('Content-Type', 'image/png');
+    }
+
+    private function generateCouponImage($coupon, $template, $manager)
+    {
+        // Load template image
+        $templatePath = storage_path('app/public/' . $template->template_image);
+        $image = $manager->read($templatePath);
+
+        // Generate QR Code
+        $qrUrl = $template->getQrUrlForCoupon($coupon->coupon_number);
+        
+        // Create QR code - v6 uses constructor only
+        $qrCode = new QrCode($qrUrl);
+        
+        $writer = new PngWriter();
+        $qrResult = $writer->write($qrCode);
+        
+        // Get QR code as data URI and read with Intervention
+        $qrDataUri = $qrResult->getDataUri();
+        $qrImage = $manager->read($qrDataUri);
+        
+        // Resize QR code to template size
+        $qrImage->scale($template->qr_size, $template->qr_size);
+
+        // Place QR code on template
+        $image->place($qrImage, 'top-left', $template->qr_x_position, $template->qr_y_position);
+
+        // Add coupon number text - using native GD for font size control
+        $core = $image->core()->native();
+        
+        $fontSize = (int)$template->coupon_number_font_size;
+        $textX = (int)$template->coupon_number_x_position;
+        $textY = (int)$template->coupon_number_y_position + $fontSize; // Adjust Y for baseline
+        $couponText = (string)$coupon->coupon_number;
+        
+        // Convert hex color to RGB for GD
+        $color = $this->hexToRgb($template->coupon_number_font_color);
+        $gdColor = imagecolorallocate($core, $color['r'], $color['g'], $color['b']);
+        
+        // Use TTF font for proper size control
+        $fontPath = $template->coupon_number_font_path 
+            ? storage_path('app/public/' . $template->coupon_number_font_path)
+            : null;
+            
+        // Try to find a system font if custom font not provided
+        if (!$fontPath || !file_exists($fontPath)) {
+            // Try common Windows font paths
+            $systemFonts = [
+                'C:/Windows/Fonts/arial.ttf',
+                'C:/Windows/Fonts/calibri.ttf',
+                'C:/Windows/Fonts/verdana.ttf',
+                'C:/Windows/Fonts/tahoma.ttf',
+            ];
+            
+            foreach ($systemFonts as $sysFont) {
+                if (file_exists($sysFont)) {
+                    $fontPath = $sysFont;
+                    break;
+                }
+            }
+        }
+        
+        if ($fontPath && file_exists($fontPath)) {
+            // Use TTF font with imagettftext for proper size control
+            imagettftext($core, $fontSize, 0, $textX, $textY, $gdColor, $fontPath, $couponText);
+        } else {
+            // Fallback: Use built-in font with larger rendering
+            $gdFontSize = 5; // Maximum built-in font size
+            imagestring($core, $gdFontSize, $textX, $textY - 15, $couponText, $gdColor);
+        }
+
+        return $image->toPng();
+    }
+
+    private function hexToRgb($hex)
+    {
+        $hex = ltrim($hex, '#');
+        return [
+            'r' => hexdec(substr($hex, 0, 2)),
+            'g' => hexdec(substr($hex, 2, 2)),
+            'b' => hexdec(substr($hex, 4, 2))
+        ];
+    }
+
+    public function printImages(Request $request)
+    {
+        $request->validate([
+            'coupon_ids' => 'required|array|min:1',
+            'coupon_ids.*' => 'exists:coupons,id',
+            'template_id' => 'required|exists:coupon_templates,id'
+        ]);
+
+        $coupons = Coupon::whereIn('id', $request->coupon_ids)->get();
+        $template = CouponTemplate::findOrFail($request->template_id);
+
+        return view('admin.coupons.print', compact('coupons', 'template'));
     }
 }

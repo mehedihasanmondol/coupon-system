@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'কুপন সিস্টেম')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body { font-family: 'SolaimanLipi', Arial, sans-serif; }
         .sidebar { min-height: 100vh; background: #343a40; }
@@ -23,7 +24,9 @@
                     <h4 class="text-white">কুপন সিস্টেম</h4>
                     <hr class="text-white">
                     <a href="{{ route('admin.dashboard') }}">ড্যাশবোর্ড</a>
-                    <a href="{{ route('admin.coupons') }}">কুপন ব্যবস্থাপনা</a>
+                    <a href="{{ route('admin.coupons.index') }}">কুপন ব্যবস্থাপনা</a>
+                    <a href="{{ route('admin.templates.index') }}">কুপন টেমপ্লেট</a>
+                    <a href="{{ route('admin.coupons.image-generator') }}">ইমেজ জেনারেটর</a>
                     <a href="{{ route('admin.prizes.templates') }}">পুরস্কার টেমপ্লেট</a>
                     <a href="{{ route('admin.prizes.draw') }}">পুরস্কার ঘোষণা</a>
                     <a href="{{ route('admin.settings') }}">সেটিংস</a>

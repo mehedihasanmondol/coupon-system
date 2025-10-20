@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\CouponTemplateController;
 use App\Http\Controllers\PrizeTemplateController;
 use App\Http\Controllers\PrizeDrawController;
 use App\Http\Controllers\WinnerController;
@@ -38,8 +39,23 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
     
     // Coupons
-    Route::get('/coupons', [CouponController::class, 'index'])->name('admin.coupons');
+    Route::get('/coupons', [CouponController::class, 'index'])->name('admin.coupons.index');
     Route::post('/coupons/generate', [CouponController::class, 'generate'])->name('admin.coupons.generate');
+    
+    // Coupon Image Generator
+    Route::get('/coupons/image-generator', [CouponController::class, 'showImageGenerator'])->name('admin.coupons.image-generator');
+    Route::post('/coupons/generate-images', [CouponController::class, 'generateImages'])->name('admin.coupons.generate-images');
+    Route::get('/coupons/preview-image', [CouponController::class, 'previewImage'])->name('admin.coupons.preview-image');
+    Route::post('/coupons/print-images', [CouponController::class, 'printImages'])->name('admin.coupons.print-images');
+    
+    // Coupon Templates
+    Route::get('/templates', [CouponTemplateController::class, 'index'])->name('admin.templates.index');
+    Route::get('/templates/create', [CouponTemplateController::class, 'create'])->name('admin.templates.create');
+    Route::post('/templates', [CouponTemplateController::class, 'store'])->name('admin.templates.store');
+    Route::get('/templates/{template}/edit', [CouponTemplateController::class, 'edit'])->name('admin.templates.edit');
+    Route::put('/templates/{template}', [CouponTemplateController::class, 'update'])->name('admin.templates.update');
+    Route::delete('/templates/{template}', [CouponTemplateController::class, 'destroy'])->name('admin.templates.destroy');
+    Route::patch('/templates/{template}/toggle-active', [CouponTemplateController::class, 'toggleActive'])->name('admin.templates.toggle-active');
     
     // Prize Templates
     Route::get('/prizes/templates', [PrizeTemplateController::class, 'index'])->name('admin.prizes.templates');
