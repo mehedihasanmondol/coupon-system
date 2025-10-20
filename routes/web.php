@@ -33,6 +33,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Admin Management
     Route::get('/admins', [AdminController::class, 'admins'])->name('admin.admins');
     Route::post('/admins', [AdminController::class, 'createAdmin'])->name('admin.admins.create');
+    Route::put('/admins/{user}', [AdminController::class, 'updateAdmin'])->name('admin.admins.update');
+    Route::delete('/admins/{user}', [AdminController::class, 'deleteAdmin'])->name('admin.admins.delete');
     
     // Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings');
